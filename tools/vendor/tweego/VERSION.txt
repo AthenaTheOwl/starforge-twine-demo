@@ -1,0 +1,4 @@
+Tweego 2.1.1 Windows x64
+Downloaded from: https://github.com/tmedwards/tweego/releases/download/v2.1.1/tweego-2.1.1-windows-x64.zip
+Official index: https://www.motoslave.net/tweego/
+Release date listed by upstream: 2020-02-25

@@ -1,0 +1,18 @@
+body {
+  background: #111318;
+  color: #f2efe8;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+#passages {
+  max-width: 780px;
+  line-height: 1.65;
+}
+
+a.link-internal {
+  color: #9dd9d2;
+}
+
+a.link-internal:hover {
+  color: #f0c36a;
+}

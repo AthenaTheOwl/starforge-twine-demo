@@ -1,0 +1,20 @@
+{
+  "name": "starforge-twine-demo",
+  "version": "1.0.0",
+  "description": "Twine/SugarCube browser demo for the full released Act 1 Starforge route.",
+  "private": true,
+  "scripts": {
+    "build": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/build_release.ps1",
+    "validate": "python tools/validate_twee.py src/passages && python tools/story_graph.py --fail-on-dead-ends --fail-on-missing-targets src/passages && python tools/validate_public_scope.py",
+    "test": "npm run validate",
+    "test:e2e": "playwright test",
+    "release:check": "python tools/check_release.py"
+  },
+  "keywords": [],
+  "author": "Cessnya Lin",
+  "license": "MIT",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}

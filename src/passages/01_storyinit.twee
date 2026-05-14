@@ -1,0 +1,7 @@
+:: StoryInit
+<<set $trust = 0>>
+<<set $resolve = 0>>
+<<set $lattice_attention = 0>>
+<<set $debt_pressure = 1>>
+<<set $chapter_count = 21>>
+<<set $optional_scene_count = 44>>

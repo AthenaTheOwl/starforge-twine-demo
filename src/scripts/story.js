@@ -1,0 +1,1 @@
+/* Reserved for tiny Twine demo hooks. Keep gameplay state in SugarCube. */

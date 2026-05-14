@@ -1,0 +1,11 @@
+:: StoryTitle
+Starforge Canticles: Act 1
+
+:: StoryData
+{
+  "ifid": "5F9D381B-DF63-4F9A-8825-2F55004D1C8A",
+  "format": "SugarCube",
+  "format-version": "2.37.3",
+  "start": "Start",
+  "zoom": 1
+}
