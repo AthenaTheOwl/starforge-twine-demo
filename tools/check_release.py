@@ -38,9 +38,33 @@ def clean_generated_artifacts() -> None:
             shutil.rmtree(path)
 
 
+def clean_report_artifacts() -> None:
+    for path in REPORT_DIRS:
+        if path.exists():
+            shutil.rmtree(path)
+
+
+def find_report_artifacts() -> list[Path]:
+    return [path for path in REPORT_DIRS if path.exists()]
+
+
+def verify_no_report_artifacts() -> int:
+    artifacts = find_report_artifacts()
+    if not artifacts:
+        return 0
+
+    print("\n== Generated report artifact check ==")
+    print("release gate found generated Playwright report artifacts:")
+    for path in artifacts:
+        print(f"- {path.relative_to(ROOT).as_posix()}")
+    print("rerun with --clean to remove known Twine test-report churn")
+    return 1
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--clean", action="store_true", help="Remove build and Playwright reports before running.")
+    parser.add_argument("--fail-on-generated", action="store_true", help="Fail if Playwright report artifacts remain after the run; build/index.html is expected output.")
     parser.add_argument("--regenerate", action="store_true", help="Regenerate Twine source from the sibling public Act 1 corpus before validating.")
     args = parser.parse_args()
 
@@ -64,12 +88,17 @@ def main() -> int:
             ],
         ),
         ("Public-scope validation", [sys.executable, "tools/validate_public_scope.py"]),
+        ("Playtest path/dead-letter audit", [sys.executable, "tools/playtest_audit.py"]),
         ("Tweego build", ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "tools/build_release.ps1"]),
         ("Playwright smoke", ["npx.cmd", "playwright", "test"]),
     ]
 
     for label, command in checks:
         failures += 1 if run(label, command) else 0
+    if args.clean:
+        clean_report_artifacts()
+    if args.fail_on_generated:
+        failures += verify_no_report_artifacts()
 
     if failures:
         print(f"\nrelease gate failed: {failures} check(s) failed")

@@ -25,10 +25,13 @@ Open `http://localhost:8000/index.html`.
 python tools\check_release.py
 ```
 
-The release gate validates the Act 1 route, compiles with Tweego, and runs
-Playwright smoke paths through the generated HTML. In the local five-repo
-cluster, use `python tools\check_release.py --clean --regenerate` to regenerate
-from `../starforge-narrative-tools/prose/act1` before validation.
+The release gate validates the Act 1 route, audits path/dead-letter coverage,
+compiles with Tweego, and runs Playwright smoke paths through the generated
+HTML. For a clean strict local proof run, use
+`python tools\check_release.py --clean --fail-on-generated`.
+In the local five-repo cluster, use
+`python tools\check_release.py --clean --fail-on-generated --regenerate` to
+regenerate from `../starforge-narrative-tools/prose/act1` before validation.
 
 ## Cleanup boundary
 
@@ -38,6 +41,7 @@ Included:
 - `tools/generate_full_act1.py` source-to-route generator
 - story CSS/JS
 - deterministic Python validators
+- deterministic playtest/path audit
 - Playwright smoke tests
 - repo-brain and spec docs
 

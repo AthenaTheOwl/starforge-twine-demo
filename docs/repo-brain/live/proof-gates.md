@@ -28,7 +28,15 @@
 - Tweego version is pinned in `tools/vendor/tweego/VERSION.txt`.
 - CI bootstraps Tweego instead of relying on a global install.
 
-## Gate 5 - Browser Smoke
+## Gate 5 - Playtest Path And Queue Audit
+
+- `python tools/playtest_audit.py` verifies all playable passages are reachable
+  from `Start`.
+- Full route-map links meet the generated Act 1 route threshold.
+- Dead-letter markers are reported as a queue and missing targets block the
+  release gate.
+
+## Gate 6 - Browser Smoke
 
 - Playwright loads the generated HTML.
 - Start page renders.
@@ -36,3 +44,10 @@
 - Main spine advances from prologue into chapter 1.
 - Representative optional scene opens from the route map.
 - Chapter 20 can finish Act 1.
+
+## Gate 7 - Cleanup
+
+- `python tools/check_release.py --clean --fail-on-generated` removes stale
+  build/report churn before validation.
+- `build/index.html` is expected release output after the gate.
+- Playwright report directories are not expected after a passing strict run.
