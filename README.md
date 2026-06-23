@@ -8,6 +8,33 @@ The repo is intentionally separate from the Ren'Py and Godot versions. Twine
 proves a fast, single-HTML interactive-fiction path; it is not the visual novel,
 RPG systems prototype, or stat-forward ChoiceScript build.
 
+## How to play
+
+Open the live demo (or `build/index.html` locally) in any modern browser. The
+game is a single self-contained Twine/SugarCube HTML file: no server, no install.
+
+- click **Begin Act 1** to start the route, or **Open Act 1 route map** to jump
+  by chapter.
+- choices are the in-passage links; click one to advance.
+- the left sidebar has **SAVES** (save/load slots, browser-local) and
+  **RESTART**. The back/forward arrows step through visited passages.
+
+## live demo
+
+Deployed as a Vercel static site. `vercel.json` sets the output directory to
+`build`, and the compiled `build/index.html` is committed, so no build step
+runs on Vercel.
+
+Deploy steps:
+
+1. go to https://vercel.com/new
+2. import `AthenaTheOwl/starforge-twine-demo`
+3. leave the framework preset as **Other** (`vercel.json` handles output dir;
+   no build command needed).
+4. click **Deploy**.
+
+<!-- live-url: https://__REPLACE_WITH_VERCEL_URL__.vercel.app -->
+
 ## Run locally
 
 ```powershell
