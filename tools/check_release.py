@@ -66,6 +66,7 @@ def main() -> int:
     parser.add_argument("--clean", action="store_true", help="Remove build and Playwright reports before running.")
     parser.add_argument("--fail-on-generated", action="store_true", help="Fail if Playwright report artifacts remain after the run; build/index.html is expected output.")
     parser.add_argument("--regenerate", action="store_true", help="Regenerate Twine source from the sibling public Act 1 corpus before validating.")
+    parser.add_argument("--skip-browser", action="store_true", help="Skip the Playwright browser smoke. Use only for fast push/PR gates; workflow_dispatch runs the full browser gate.")
     args = parser.parse_args()
 
     if args.clean:
@@ -90,8 +91,9 @@ def main() -> int:
         ("Public-scope validation", [sys.executable, "tools/validate_public_scope.py"]),
         ("Playtest path/dead-letter audit", [sys.executable, "tools/playtest_audit.py"]),
         ("Tweego build", ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "tools/build_release.ps1"]),
-        ("Playwright smoke", ["npx.cmd", "playwright", "test"]),
     ]
+    if not args.skip_browser:
+        checks.append(("Playwright smoke", ["npx.cmd", "playwright", "test"]))
 
     for label, command in checks:
         failures += 1 if run(label, command) else 0
