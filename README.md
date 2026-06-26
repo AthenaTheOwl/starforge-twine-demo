@@ -1,12 +1,58 @@
-# No. 17 - starforge-twine-demo
+# starforge-twine-demo
+
+Act 1 opens on a chapter called "Floors Not Thrones" and closes on one called
+"The Receipt." In between: a debt clock, an exit writ, a name given not owned.
+The whole route — 71 passages, prologue to receipt — compiles into one 1.6 MB HTML
+file you can open with a double-click. No server, no install, no save file on
+anyone else's disk.
+
+## What it does
 
 [Starforge Canticles](https://www.royalroad.com/fiction/149065/starforge-canticles)
-is a serialized speculative-fiction novel by Cessnya Lin. This repo adapts the
-full released Act 1 route into a Twine/SugarCube browser demo.
+is a serialized speculative-fiction novel by Cessnya Lin. This repo takes the
+released Act 1 prose and pours it into a Twine/SugarCube interactive-fiction page:
+20 main chapters plus a spread of lettered optional scenes (medical autonomy,
+crew meal dynamics, a coffee ritual, asking for what you need), all reachable from
+one route map.
 
-The repo is intentionally separate from the Ren'Py and Godot versions. Twine
-proves a fast, single-HTML interactive-fiction path; it is not the visual novel,
-RPG systems prototype, or stat-forward ChoiceScript build.
+Twine is the fast path. It is the lightest of the four engine demos in the
+cluster — a single self-contained HTML file proves the prose works as something
+you click through, before anyone builds the visual novel, the Godot prototype, or
+the stat-forward ChoiceScript route. The generator owns the routing; the validators
+make sure every passage is reachable and nothing links into the dark.
+
+## Try it
+
+The release gate is the honest demo: it builds the page from source and walks a
+real browser through it. One command runs the whole thing.
+
+```powershell
+python tools\check_release.py
+```
+
+```
+twee validation passed: 71 passages
+story graph validation passed: 68 playable passages, 68 reachable
+public-scope validation passed
+Twine playtest audit
+- playable passages: 68
+- reachable passages: 68
+- route-map links: 65
+- graph links: 273
+- dead-letter marker hits: 0
+playtest audit passed
+Built build\index.html
+  4 passed (4.4s)
+release gate passed
+```
+
+68 reachable out of 68, zero dead-letter hits. Every door in the route opens onto
+a room, and every room has a way out — which is more than the story's miners can
+say. For a clean strict local proof run, use
+`python tools\check_release.py --clean --fail-on-generated`.
+In the local five-repo cluster, use
+`python tools\check_release.py --clean --fail-on-generated --regenerate` to
+regenerate from `../starforge-narrative-tools/prose/act1` before validation.
 
 ## How to play
 
@@ -19,7 +65,7 @@ game is a single self-contained Twine/SugarCube HTML file: no server, no install
 - the left sidebar has **SAVES** (save/load slots, browser-local) and
   **RESTART**. The back/forward arrows step through visited passages.
 
-## live demo
+## Live demo
 
 Deployed as a Vercel static site. `vercel.json` sets the output directory to
 `build`, and the compiled `build/index.html` is committed, so no build step
@@ -46,45 +92,30 @@ python -m http.server 8000 --directory build
 
 Open `http://localhost:8000/index.html`.
 
-## Validate
+## Layout
 
-```powershell
-python tools\check_release.py
-```
+What ships and what stays out:
 
-The release gate validates the Act 1 route, audits path/dead-letter coverage,
-compiles with Tweego, and runs Playwright smoke paths through the generated
-HTML. For a clean strict local proof run, use
-`python tools\check_release.py --clean --fail-on-generated`.
-In the local five-repo cluster, use
-`python tools\check_release.py --clean --fail-on-generated --regenerate` to
-regenerate from `../starforge-narrative-tools/prose/act1` before validation.
+- `src/passages/` — Twee/SugarCube source, hand-owned CSS/JS alongside
+- `tools/generate_full_act1.py` — the source-to-route generator
+- the Python validators (twee shape, graph integrity, public scope) and the
+  playtest/path audit
+- Playwright smoke tests, repo-brain and spec docs
 
-## Cleanup boundary
-
-Included:
-
-- `src/passages/` Twee/SugarCube source
-- `tools/generate_full_act1.py` source-to-route generator
-- story CSS/JS
-- deterministic Python validators
-- deterministic playtest/path audit
-- Playwright smoke tests
-- repo-brain and spec docs
-
-Excluded:
-
-- generated `build/`
-- Playwright reports
-- Node dependencies
-- unreleased later-act prose/spec content
-- engine SDKs unrelated to Twine
+Out of the repo: the generated `build/`, Playwright reports, Node dependencies,
+unreleased later-act prose, and engine SDKs that have nothing to do with Twine.
 
 ## See also
 
-Part of the Starforge cluster:
+Part of the Starforge cluster — same Act 1 prose, four different playable shapes:
 
-- [starforge-narrative-tools](https://github.com/AthenaTheOwl/starforge-narrative-tools) - public Act 1 corpus + conversion/validation tooling
-- [starforge-renpy-demo](https://github.com/AthenaTheOwl/starforge-renpy-demo) - Act 1 Ren'Py narrative demo copy
-- [starforge-rpg-prototype](https://github.com/AthenaTheOwl/starforge-rpg-prototype) - Act 1 Godot RPG prototype copy
-- [starforge-choicescript-demo](https://github.com/AthenaTheOwl/starforge-choicescript-demo) - full Act 1 ChoiceScript route
+- [starforge-narrative-tools](https://github.com/AthenaTheOwl/starforge-narrative-tools) — the public Act 1 corpus this demo regenerates from, plus the conversion and validation tooling
+- [starforge-renpy-demo](https://github.com/AthenaTheOwl/starforge-renpy-demo) — the same Act 1 as a Ren'Py visual novel
+- [starforge-rpg-prototype](https://github.com/AthenaTheOwl/starforge-rpg-prototype) — the Godot RPG-systems take on the route
+- [starforge-choicescript-demo](https://github.com/AthenaTheOwl/starforge-choicescript-demo) — the full Act 1 as a stat-forward ChoiceScript route
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+</content>
+</invoke>
