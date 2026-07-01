@@ -117,5 +117,3 @@ Part of the Starforge cluster — same Act 1 prose, four different playable shap
 ## License
 
 MIT. See [LICENSE](LICENSE).
-</content>
-</invoke>
