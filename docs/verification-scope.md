@@ -17,7 +17,4 @@ The flag changes evidence storage only. It does not skip the browser or
 alter the story. The default release command remains available.
 
 Reachability and four smoke paths do not prove every passage, save/load case
-or browser layout. For an AI Product Team experiment, propose one additional
-behavioral smoke with an observable expected state, then compare its failure
-signal with the existing suite. Keep the task bounded and preserve the
-published prose. A review report cannot replace an executed browser check.
+or browser layout.
