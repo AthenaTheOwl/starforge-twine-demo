@@ -13,7 +13,9 @@ can be used without deleting another run's reports:
 python tools/check_release.py --browser-output C:\path\to\fresh-proof-directory
 ```
 
-The flag changes evidence storage only. It does not skip the browser or
+Playwright empties this directory before each run, so point it at a new
+directory outside the repo; the gate refuses a path inside the repo, and the
+flag cannot be combined with `--skip-browser`. It does not skip the browser or
 alter the story. The default release command remains available.
 
 Reachability and four smoke paths do not prove every passage, save/load case
