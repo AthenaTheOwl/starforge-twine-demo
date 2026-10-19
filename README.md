@@ -114,6 +114,10 @@ Part of the Starforge cluster — same Act 1 prose, four different playable shap
 - [starforge-rpg-prototype](https://github.com/AthenaTheOwl/starforge-rpg-prototype) — the Godot RPG-systems take on the route
 - [starforge-choicescript-demo](https://github.com/AthenaTheOwl/starforge-choicescript-demo) — the full Act 1 as a stat-forward ChoiceScript route
 
+[Current verification scope](docs/verification-scope.md) records the October 18,
+2026 build and four browser smoke paths, plus `--browser-output` for keeping
+new evidence separate from a locked older report directory.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).

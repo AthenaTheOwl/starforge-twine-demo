@@ -67,6 +67,7 @@ def main() -> int:
     parser.add_argument("--fail-on-generated", action="store_true", help="Fail if Playwright report artifacts remain after the run; build/index.html is expected output.")
     parser.add_argument("--regenerate", action="store_true", help="Regenerate Twine source from the sibling public Act 1 corpus before validating.")
     parser.add_argument("--skip-browser", action="store_true", help="Skip the Playwright browser smoke. Use only for fast push/PR gates; workflow_dispatch runs the full browser gate.")
+    parser.add_argument("--browser-output", type=Path, help="Write browser evidence to this directory instead of the configured default; useful when an older report directory is locked.")
     args = parser.parse_args()
 
     if args.clean:
@@ -93,7 +94,10 @@ def main() -> int:
         ("Tweego build", ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "tools/build_release.ps1"]),
     ]
     if not args.skip_browser:
-        checks.append(("Playwright smoke", ["npx.cmd", "playwright", "test"]))
+        browser_command = ["npx.cmd", "playwright", "test"]
+        if args.browser_output:
+            browser_command.extend(["--output", str(args.browser_output.resolve())])
+        checks.append(("Playwright smoke", browser_command))
 
     for label, command in checks:
         failures += 1 if run(label, command) else 0
