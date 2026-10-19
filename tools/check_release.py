@@ -44,12 +44,15 @@ def clean_report_artifacts() -> None:
             shutil.rmtree(path)
 
 
-def find_report_artifacts() -> list[Path]:
-    return [path for path in REPORT_DIRS if path.exists()]
+def find_report_artifacts(browser_output: Path | None = None) -> list[Path]:
+    paths = list(REPORT_DIRS)
+    if browser_output is not None and browser_output.is_relative_to(ROOT) and browser_output not in paths:
+        paths.append(browser_output)
+    return [path for path in paths if path.exists()]
 
 
-def verify_no_report_artifacts() -> int:
-    artifacts = find_report_artifacts()
+def verify_no_report_artifacts(browser_output: Path | None = None) -> int:
+    artifacts = find_report_artifacts(browser_output)
     if not artifacts:
         return 0
 
@@ -57,7 +60,10 @@ def verify_no_report_artifacts() -> int:
     print("release gate found generated Playwright report artifacts:")
     for path in artifacts:
         print(f"- {path.relative_to(ROOT).as_posix()}")
-    print("rerun with --clean to remove known Twine test-report churn")
+    if any(path in REPORT_DIRS for path in artifacts):
+        print("rerun with --clean to remove known Twine test-report churn")
+    if any(path not in REPORT_DIRS for path in artifacts):
+        print("--clean keeps --browser-output evidence; point --browser-output outside the repo")
     return 1
 
 
@@ -67,8 +73,11 @@ def main() -> int:
     parser.add_argument("--fail-on-generated", action="store_true", help="Fail if Playwright report artifacts remain after the run; build/index.html is expected output.")
     parser.add_argument("--regenerate", action="store_true", help="Regenerate Twine source from the sibling public Act 1 corpus before validating.")
     parser.add_argument("--skip-browser", action="store_true", help="Skip the Playwright browser smoke. Use only for fast push/PR gates; workflow_dispatch runs the full browser gate.")
-    parser.add_argument("--browser-output", type=Path, help="Write browser evidence to this directory instead of the configured default; useful when an older report directory is locked.")
+    parser.add_argument("--browser-output", type=Path, help="Write browser evidence to this directory instead of the configured default; useful when an older report directory is locked. Not valid with --skip-browser; an in-repo directory fails --fail-on-generated.")
     args = parser.parse_args()
+    if args.skip_browser and args.browser_output:
+        parser.error("--browser-output has no effect with --skip-browser")
+    browser_output = args.browser_output.resolve() if args.browser_output else None
 
     if args.clean:
         clean_generated_artifacts()
@@ -95,8 +104,8 @@ def main() -> int:
     ]
     if not args.skip_browser:
         browser_command = ["npx.cmd", "playwright", "test"]
-        if args.browser_output:
-            browser_command.extend(["--output", str(args.browser_output.resolve())])
+        if browser_output:
+            browser_command.extend(["--output", str(browser_output)])
         checks.append(("Playwright smoke", browser_command))
 
     for label, command in checks:
@@ -104,7 +113,7 @@ def main() -> int:
     if args.clean:
         clean_report_artifacts()
     if args.fail_on_generated:
-        failures += verify_no_report_artifacts()
+        failures += verify_no_report_artifacts(browser_output)
 
     if failures:
         print(f"\nrelease gate failed: {failures} check(s) failed")
