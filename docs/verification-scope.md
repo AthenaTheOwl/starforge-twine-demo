@@ -13,11 +13,12 @@ can be used without deleting another run's reports:
 python tools/check_release.py --browser-output C:\path\to\fresh-proof-directory
 ```
 
-The flag changes evidence storage only. It does not skip the browser or
-alter the story. The default release command remains available.
+Playwright deletes this directory before each run, so point it at a new
+directory outside the repo; the gate refuses a path inside the repo or an
+existing non-empty directory that Playwright did not write, and the flag cannot
+be combined with `--skip-browser`. With this flag, `--clean` and
+`--fail-on-generated` leave the configured default output directory alone. It
+does not skip the browser or alter the story. The default release command remains available.
 
 Reachability and four smoke paths do not prove every passage, save/load case
-or browser layout. For an AI Product Team experiment, propose one additional
-behavioral smoke with an observable expected state, then compare its failure
-signal with the existing suite. Keep the task bounded and preserve the
-published prose. A review report cannot replace an executed browser check.
+or browser layout.

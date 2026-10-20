@@ -13,6 +13,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 BUILD_DIR = ROOT / "build"
 REPORT_DIRS = [ROOT / "test-results", ROOT / "playwright-report"]
+# outputDir in playwright.config.ts; only treated as churn when --browser-output is not used.
+DEFAULT_BROWSER_OUTPUT = ROOT / ".gstack" / "playwright-results"
 
 
 def run(label: str, command: list[str]) -> int:
@@ -21,7 +23,22 @@ def run(label: str, command: list[str]) -> int:
     return subprocess.run(command, cwd=ROOT, check=False).returncode
 
 
-def clean_generated_artifacts() -> None:
+def report_dirs(browser_output: Path | None) -> list[Path]:
+    # With --browser-output the default directory may hold another (possibly locked) run's
+    # evidence, so leave it alone.
+    return REPORT_DIRS if browser_output else REPORT_DIRS + [DEFAULT_BROWSER_OUTPUT]
+
+
+def remove_dirs(paths: list[Path]) -> None:
+    for path in paths:
+        if path.exists():
+            try:
+                shutil.rmtree(path)
+            except OSError as error:
+                print(f"warning: could not remove {path.relative_to(ROOT).as_posix()}: {error}")
+
+
+def clean_generated_artifacts(paths: list[Path]) -> None:
     if BUILD_DIR.exists():
         for path in BUILD_DIR.iterdir():
             if path.name != ".gitkeep":
@@ -33,23 +50,15 @@ def clean_generated_artifacts() -> None:
         BUILD_DIR.mkdir()
     (BUILD_DIR / ".gitkeep").touch()
 
-    for path in REPORT_DIRS:
-        if path.exists():
-            shutil.rmtree(path)
+    remove_dirs(paths)
 
 
-def clean_report_artifacts() -> None:
-    for path in REPORT_DIRS:
-        if path.exists():
-            shutil.rmtree(path)
+def find_report_artifacts(paths: list[Path]) -> list[Path]:
+    return [path for path in paths if path.exists()]
 
 
-def find_report_artifacts() -> list[Path]:
-    return [path for path in REPORT_DIRS if path.exists()]
-
-
-def verify_no_report_artifacts() -> int:
-    artifacts = find_report_artifacts()
+def verify_no_report_artifacts(paths: list[Path]) -> int:
+    artifacts = find_report_artifacts(paths)
     if not artifacts:
         return 0
 
@@ -64,14 +73,28 @@ def verify_no_report_artifacts() -> int:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--clean", action="store_true", help="Remove build and Playwright reports before running.")
-    parser.add_argument("--fail-on-generated", action="store_true", help="Fail if Playwright report artifacts remain after the run; build/index.html is expected output.")
+    parser.add_argument("--fail-on-generated", action="store_true", help="Fail if Playwright report artifacts remain after the run; build/index.html is expected output. Pair with --clean when the browser runs, because Playwright always leaves its output directory behind.")
     parser.add_argument("--regenerate", action="store_true", help="Regenerate Twine source from the sibling public Act 1 corpus before validating.")
     parser.add_argument("--skip-browser", action="store_true", help="Skip the Playwright browser smoke. Use only for fast push/PR gates; workflow_dispatch runs the full browser gate.")
-    parser.add_argument("--browser-output", type=Path, help="Write browser evidence to this directory instead of the configured default; useful when an older report directory is locked.")
+    parser.add_argument("--browser-output", type=Path, help="Write browser evidence to this directory instead of the configured default; useful when an older report directory is locked. Playwright deletes this directory before each run, so it must be outside the repo and either new, empty or a previous Playwright output directory; not valid with --skip-browser.")
     args = parser.parse_args()
+    if args.skip_browser and args.browser_output:
+        parser.error("--browser-output has no effect with --skip-browser")
+    browser_output = args.browser_output.resolve() if args.browser_output else None
+    if browser_output and (browser_output.is_relative_to(ROOT) or ROOT.is_relative_to(browser_output)):
+        parser.error("--browser-output must be outside the repo; Playwright deletes that directory before each run")
+    if browser_output and browser_output.exists():
+        if not browser_output.is_dir():
+            parser.error("--browser-output must be a directory")
+        if any(browser_output.iterdir()) and not (browser_output / ".last-run.json").exists():
+            parser.error(
+                "--browser-output must be a new or empty directory, or one Playwright wrote before "
+                "(it holds .last-run.json); Playwright deletes that directory before each run"
+            )
+    generated_dirs = report_dirs(browser_output)
 
     if args.clean:
-        clean_generated_artifacts()
+        clean_generated_artifacts(generated_dirs)
 
     failures = 0
     if args.regenerate:
@@ -95,16 +118,16 @@ def main() -> int:
     ]
     if not args.skip_browser:
         browser_command = ["npx.cmd", "playwright", "test"]
-        if args.browser_output:
-            browser_command.extend(["--output", str(args.browser_output.resolve())])
+        if browser_output:
+            browser_command.extend(["--output", str(browser_output)])
         checks.append(("Playwright smoke", browser_command))
 
     for label, command in checks:
         failures += 1 if run(label, command) else 0
     if args.clean:
-        clean_report_artifacts()
+        remove_dirs(generated_dirs)
     if args.fail_on_generated:
-        failures += verify_no_report_artifacts()
+        failures += verify_no_report_artifacts(generated_dirs)
 
     if failures:
         print(f"\nrelease gate failed: {failures} check(s) failed")
